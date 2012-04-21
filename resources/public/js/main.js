@@ -13,13 +13,16 @@ function scheduleSequenceOfText(seq) {
     }
 }
 
-function heartbeat() {
-    todo.sort();
-    if (todo && todo.length > 0 && todo[0].time < currentTime) {
-        var next = todo.shift();
-        next.fun();
+function heartbeat(fast) {
+    var speed = fast ? 10 : 1;
+    return function() {
+        todo.sort();
+        while (todo && todo.length > 0 && todo[0].time < currentTime) {
+            var next = todo.shift();
+            next.fun();
+        }
+        currentTime += speed;
     }
-    ++currentTime;
 }
 
 function displayLine(line) {
@@ -32,14 +35,12 @@ function outro() {
     scheduleSequenceOfText([0, "Congratulations!", 5, "You have won the game!", 5, "Send feedback to markku.rontu@iki.fi or tweet!"]);
 }
 
-function init() {
+function init(fast) {
     var loop = new Audio('sounds/string-1-loop.wav');
     loop.preload = true;
     loop.play();
-    window.setInterval(heartbeat, 1000);
+    window.setInterval(heartbeat(fast), 1000);
     schedule({"time": 5, "fun": displayLine("But what about the Tiny World theme?")});
     schedule({"time": 10, "fun": displayLine("You shall see!")});
     schedule({"time": 60, "fun": outro});
 }
-
-init();

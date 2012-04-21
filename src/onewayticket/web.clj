@@ -6,15 +6,24 @@
             [compojure.handler :as handler])
   (:use [ring.adapter.jetty :only [run-jetty]]))
 
-(defn intro []
+(defn intro [state]
   (html5 [:head [:title "One-way Ticket To Space Train"]
           (include-css "css/main.css")
           (include-js "http://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js")
           (include-js "js/main.js")]
-         [:body [:div {:id "intro" :class "introtext"} "Space man, it's huge!"]]))
+         [:body [:div {:id "intro" :class "introtext"} "Space man, it's huge!"]
+          (javascript-tag (str "init(" (:fast state) ");"))]))
+
+(defn init-game-state [& {:keys [fast] :as state}]
+  state)
+
+(defn start-game [fast]
+  (intro (init-game-state :fast (= "true" fast))))
 
 (defroutes main-routes
-  (GET "/" [] (intro))
+  (GET "/"  {{state :state} :session
+             {fast :fast} :params}
+       (start-game fast))
   (route/resources "/")
   (route/not-found "Page not found!"))
 
