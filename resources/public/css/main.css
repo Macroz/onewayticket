@@ -6,14 +6,16 @@ body {
 
 .toggleon {
     fill: #00eeee;
+    cursor: pointer;
 }
 
 .toggleoff {
     fill: #002222;
+    cursor: pointer;
 }
 
 .introtext {
-    width: 100%;
+    pointer-events: none;
     position: absolute;
     font-family: Impact, Charcoal, sans-serif;
     font-size: 2em;
@@ -23,7 +25,8 @@ body {
     margin: auto;
     color: #ccc;
     top: 50%;
-    height: 300px;
-    margin-top: -150px;
-    line-height: 300px;
+    width: 100%;
+    height: 100px;
+    margin-top: -75px;
+    line-height: 100px;
 }

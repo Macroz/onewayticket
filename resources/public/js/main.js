@@ -72,7 +72,7 @@ function intro() {
 }
 
 function outro() {
-    scheduleNow(playSound("funeral.wav"));
+    scheduleNow(playSound("choir.wav"));
     scheduleSequenceOfText([0, "Congratulations!",
                             5, "You have won the game!",
                             5, "Send feedback to markku.rontu@iki.fi or tweet!"]);
