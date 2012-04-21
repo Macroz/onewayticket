@@ -109,7 +109,7 @@ function intro() {
                             10, "Mankind redoubles its efforts to colonize know space<br/>and begins building a ship capable of propelling itself to the stars.",
                             15, "Year 2040 the ship is ready.<br/>It is named the Orion Express,<br/>a veritable space train sailing on the solar winds.",
                             8, "Year 2041 the ship departs on its maiden voyage,<br/>with 10 000 cryogenically frozen colonists,<br/>to journey to the closest star with a known habitable planet<br/>and protect the future of mankind.",
-                            10, "You as its captain are responsible for its destiny,<br/>when it reaches its desination.",
+                            10, "You as its captain are responsible for its destiny,<br/>when it reaches its destination.",
                             10, "Time passes as the ship makes its journey.",
                             5, "Then you begin to wake up..."], false, 15, 5);
     scheduleAfter(90, start);
