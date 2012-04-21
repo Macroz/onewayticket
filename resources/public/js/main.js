@@ -1,12 +1,21 @@
 var currentTime = 0;
 var todo = [];
+var state = {
+    "lifesupport": false,
+    "oxygenlevel": 5
+    //     "uistate": {
+    //         "leftdisplay": {
+    //             "buttonleft1": makeOffButton("leftleftbutton1");
+    //         }
+    //     }
+};
 
 function schedule(item) {
     todo.push(item);
 }
 
 function scheduleAt(time, fun) {
-    log("Scheduled at " + time);
+    //log("Scheduled at " + time);
     schedule({"time": time, "fun": fun});
 }
 
@@ -18,11 +27,25 @@ function scheduleAfter(time, fun) {
     scheduleAt(currentTime + time, fun);
 }
 
-function scheduleSequenceOfText(seq) {
+function scheduleSequenceOfText(seq, holdLast, time, timeLast) {
     var t = currentTime;
+    if (!time) {
+        time = 3;
+    }
+    if (!timeLast) {
+        timeLast = time;
+    }
     for (var i = 0; i < seq.length; i += 2) {
         t += seq[i];
-        scheduleAt(t, displayLine(seq[i+1]));
+        if (i + 2 < seq.length) {
+            scheduleAt(t, displayFor(time, seq[i+1]));
+        } else {
+            if (holdLast) {
+                scheduleAt(t, displayLine(seq[i+1]));
+            } else {
+                scheduleAt(t, displayFor(timeLast, seq[i+1]));
+            }
+        }
     }
 }
 
@@ -55,6 +78,17 @@ function displayLine(line) {
     };
 }
 
+function displayFor(time, line) {
+    return function() {
+        $("#intro").html(line);
+        scheduleAfter(time, function() {
+            if ($("#intro").html() == line) {
+                $("#intro").html("");
+            }
+        });
+    };
+}
+
 function playSound(sound) {
     return function() {
         var loop = new Audio("sounds/"+sound);
@@ -63,24 +97,33 @@ function playSound(sound) {
     };
 }
 
-function intro() {
-    scheduleNow(playSound("string-1-loop.wav"));
-    scheduleSequenceOfText([0, "Space man, it's huge!",
-                            5, displayLine("But what about the Tiny World theme?"),
-                            5, displayLine("You shall see!"),
-                            2, displayLine("Uhh, you have a hard time breathing!")]);
+function start() {
+    checkLifeSupport();
 }
 
-function outro() {
+function intro() {
+    scheduleNow(playSound("string-1-loop.wav"));
+    scheduleSequenceOfText([0, "Year 2038 mankind builds a supercomputer to predict its future.",
+                            8, "In two weeks the machine achieves sentience and names itself im01.",
+                            8, "im01 predicts mankind will be extinct in just two decades, unless it spreads offworld.",
+                            10, "Mankind redoubles its efforts to colonize know space<br/>and begins building a ship capable of propelling itself to the stars.",
+                            15, "Year 2040 the ship is ready.<br/>It is named the Orion Express,<br/>a veritable space train sailing on the solar winds.",
+                            8, "Year 2041 the ship departs on its maiden voyage,<br/>with 10 000 cryogenically frozen colonists,<br/>to journey to the closest star with a known habitable planet<br/>and protect the future of mankind.",
+                            10, "You as its captain are responsible for its destiny,<br/>when it reaches its desination.",
+                            10, "Time passes as the ship makes its journey.",
+                            5, "Then you begin to wake up..."], false, 15, 5);
+    scheduleAfter(90, start);
+}
+
+function win() {
     scheduleNow(playSound("choir.wav"));
     scheduleSequenceOfText([0, "Congratulations!",
                             5, "You have won the game!",
-                            5, "Send feedback to markku.rontu@iki.fi or tweet!"]);
+                            5, "Send feedback to markku.rontu@iki.fi or tweet!"], true);
 }
 
 function isLifeSupport() {
-    var jqbutton = $("#lifesupportbutton");
-    return jqbutton.attr("class") == "toggleon";
+    return state.lifesupport;
 }
 
 function toggleLifeSupport(event) {
@@ -88,8 +131,10 @@ function toggleLifeSupport(event) {
     var button = jqbutton[0];
     if (jqbutton.attr("class") == "toggleon") {
         setSVGAttribute(button, "class", "toggleoff");
+        state.lifesupport = false;
     } else if (jqbutton.attr("class") == "toggleoff") {
         setSVGAttribute(button, "class", "toggleon");
+        state.lifesupport = true;
     }
 }
 
@@ -97,10 +142,14 @@ function setSVGAttribute(element, name, value) {
     element.setAttributeNS(null, name, value);
 }
 
-function makeToggleButton(id, toggleFun) {
+function makeToggleButton(id, toggleFun, initialState) {
     var jqbutton = $("#"+id);
     var button = jqbutton[0];
-    setSVGAttribute(button, "class", "toggleoff");
+    if (initialState) {
+        setSVGAttribute(button, "class", "toggleon");
+    } else {
+        setSVGAttribute(button, "class", "toggleoff");
+    }
     jqbutton.on("click", function(event) {
         playSound("button1.wav")();
         toggleFun(event);
@@ -112,7 +161,6 @@ function makePushButton(id, pushFun) {
     var button = jqbutton[0];
     setSVGAttribute(button, "class", "pushoff");
     jqbutton.on("click", function(event) {
-        log(button);
         setSVGAttribute(button, "class", "pushon");
         playSound("button1.wav")();
         scheduleAfter(1, function() {
@@ -123,26 +171,50 @@ function makePushButton(id, pushFun) {
 }
 
 function checkLifeSupport() {
-    if (isLifeSupport()) {
-        outro();
+    log("Life Support " + state.lifesupport);
+    log("Oxygen level " + state.oxygenlevel);
+    if (!isLifeSupport() && state.oxygenlevel > 0) {
+        state.oxygenlevel -= 1;
+        if (state.oxygenlevel == 8) {
+            displayFor(2, "The air feels stale.")();
+        } else if (state.oxygenlevel < 5) {
+            displayFor(2, "You are suffocating!")();
+        }
+    } else if (isLifeSupport() && state.oxygenlevel < 10) {
+        state.oxygenlevel += 1;
+        if (state.oxygenlevel == 8) {
+            displayFor(2, "The air feels fresh again.")();
+        } else if (state.oxygenlevel < 5) {
+            displayFor(2, "You are suffocating!")();
+        }
+    }
+    if (state.oxygenlevel == 0) {
+        scheduleNow(displayLine("You pass out!"));
+        scheduleAfter(2, die);
     } else {
-        scheduleNow(playSound("funeral.wav"));
-        scheduleSequenceOfText([0, "You gasp at the lack of air!",
-                                5, "You have died.",
-                                5, "Reload to try again.",
-                                5, "Send feedback to markku.rontu@iki.fi or tweet!"]);
-
+        scheduleAfter(10, checkLifeSupport);
     }
 }
 
-function setupButton(id, name, fun) {
+function die() {
+    scheduleNow(playSound("funeral.wav"));
+    scheduleSequenceOfText([0, "You have died.",
+                            5, "Reload to try again.",
+                            5, "Send feedback to markku.rontu@iki.fi or tweet!"], true, 5);
+}
+
+function setupButton(id, name, fun, toggle, initialState) {
     var jqtext = $("#" + id + "text");
     var text = jqtext[0];
     if (text) {
         if (fun) {
             setSVGAttribute(text, "class", "texton");
             text.childNodes[1].firstChild.nodeValue = name;
-            makePushButton(id, fun);
+            if (toggle) {
+                makeToggleButton(id, fun, initialState);
+            } else {
+                makePushButton(id, fun);
+            }
         } else {
             setSVGAttribute(text, "class", "textoff");
         }
@@ -163,9 +235,11 @@ function makeDisplay(displayid, layerid) {
     var jqdisplay = $("#"+displayid);
     var display = jqdisplay[0];
     setSVGAttribute(display, "class", "displayoff");
-    var jqlayer = $("#"+layerid);
-    var layer = jqlayer[0];
-    setSVGAttribute(layer, "class", "layeroff");
+    if (layerid) {
+        var jqlayer = $("#"+layerid);
+        var layer = jqlayer[0];
+        setSVGAttribute(layer, "class", "layeroff");
+    }
 }
 
 function unsetupAllButtons() {
@@ -192,22 +266,25 @@ function unsetupAllButtons() {
 }
 
 function switchToSpaceDisplay(event) {
+    switchOffAllDisplays();
     var jqdisplay = $("#spacedisplaymode");
     var display = jqdisplay[0];
     setSVGAttribute(display, "class", "displayon");
     var jqlayer = $("#layer2");
     var layer = jqlayer[0];
     setSVGAttribute(layer, "class", "layeron");
-    unsetupAllButtons();
 }
 
-// var state = {
-//     "uistate": {
-//         "leftdisplay": {
-//             "buttonleft1": makeOffButton("leftleftbutton1");
-//         }
-//     }
-// };
+function switchToSystemDisplay(event) {
+    switchOffAllDisplays();
+    setupButton("leftleftbutton1", "Life Support", toggleLifeSupport, true, isLifeSupport());
+    //var jqdisplay = $("#systemdisplaymode");
+    //var display = jqdisplay[0];
+    //setSVGAttribute(display, "class", "displayon");
+    //var jqlayer = $("#layer3");
+    //var layer = jqlayer[0];
+    //setSVGAttribute(layer, "class", "layeron");
+}
 
 function switchOffAllDisplays() {
     unsetupAllButtons();
@@ -220,13 +297,14 @@ function switchOffAllDisplays() {
 }
 
 function switchToMenu(event) {
-    //setupButton("leftrightbutton5", "System", switchToSystemDisplay);
     setupButton("leftleftbutton1", "Off", switchOffAllDisplays);
     setupButton("leftleftbutton2", "Space", switchToSpaceDisplay);
+    setupButton("leftrightbutton5", "System", switchToSystemDisplay);
 }
 
 function initUI() {
     makeDisplay("spacedisplaymode", "layer2");
+    //makeDisplay("systemdisplaymode", null);
     unsetupAllButtons();
     //makeToggleButton("leftleftbutton1", toggleLifeSupport);
     //makePushButton("leftleftbutton2", switchToSpaceDisplay);
@@ -236,6 +314,6 @@ function initUI() {
 function init(fast) {
     window.setInterval(heartbeat(fast), 100);
     initUI();
-    //scheduleNow(intro);
+    scheduleNow(intro);
     //scheduleAt(60, checkLifeSupport);
 }
