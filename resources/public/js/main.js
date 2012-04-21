@@ -112,25 +112,35 @@ function playSound(sound) {
     };
 }
 
+function hideAll() {
+    $("#layer1").attr("style", "display: none;");
+    $("#layer2").attr("style", "display: none;");
+    $("#layer3").attr("style", "display: none;");
+}
+
 function start() {
-    checkLifeSupport();
+    $("#layer1").attr("style", "display: block;");
+    scheduleAfter(5, checkLifeSupport());
 }
 
 function intro() {
+    hideAll();
     scheduleNow(playSound("string-1-loop.wav"));
     scheduleSequenceOfText([0, "Year 2038 mankind builds a supercomputer to predict its future.",
                             8, "In two weeks the machine achieves sentience and names itself im01.",
                             8, "im01 predicts mankind will be extinct in just two decades, unless it spreads offworld.",
-                            10, "Mankind redoubles its efforts to colonize know space<br/>and begins building a ship capable of propelling itself to the stars.",
+                            10, "Mankind redoubles its efforts to colonize known space<br/>and begins building a ship capable of propelling itself to the stars.",
                             15, "Year 2040 the ship is ready.<br/>It is named the Orion Express,<br/>a veritable space train sailing on the solar winds.",
-                            8, "Year 2041 the ship departs on its maiden voyage,<br/>with 10 000 cryogenically frozen colonists,<br/>to journey to the closest star with a known habitable planet<br/>and protect the future of mankind.",
-                            10, "You as its captain are responsible for its destiny,<br/>when it reaches its destination.",
-                            10, "Time passes as the ship makes its journey.",
+                            8, "Year 2041 the ship departs on its maiden voyage,<br/>with 10 000 cryogenically frozen colonists.",
+                            8, "To journey to the closest star with a known habitable planet<br/>and ensure the future of mankind.",
+                            10, "You as its captain are responsible for its destiny.<br/>But not yet.",
+                            8, "Time passes as the ship makes its journey.",
                             5, "Then you begin to wake up..."], false, 15, 5);
-    scheduleAfter(90, start);
+    scheduleAfter(87, start);
 }
 
 function win() {
+    hideAll();
     scheduleNow(playSound("choir.wav"));
     scheduleSequenceOfText([0, "Congratulations!",
                             5, "You have won the game!",
@@ -212,6 +222,7 @@ function checkLifeSupport() {
 }
 
 function die() {
+    hideAll();
     scheduleNow(playSound("funeral.wav"));
     scheduleSequenceOfText([0, "You have died.",
                             5, "Reload to try again.",
@@ -380,9 +391,9 @@ function initUI() {
 }
 
 function init(fast) {
+    hideAll();
     window.setInterval(heartbeat(fast), 100);
     initUI();
-    //intro();
-    start();
-    //scheduleAt(60, checkLifeSupport);
+    intro();
+    //start();
 }
