@@ -1,0 +1,21 @@
+body {
+    background-color: black;
+    width: 100%;
+    text-align: center;
+}
+
+.introtext {
+    width: 100%;
+    position: absolute;
+    font-family: Impact, Charcoal, sans-serif;
+    font-size: 2em;
+    letter-spacing: 1pt;
+    text-align: center;
+    vertical-align: middle;
+    margin: auto;
+    color: #ccc;
+    top: 50%;
+    height: 300px;
+    margin-top: -150px;
+    line-height: 300px;
+}

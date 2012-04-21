@@ -7,8 +7,10 @@
   (:use [ring.adapter.jetty :only [run-jetty]]))
 
 (defn intro []
-  (html5 [:head [:title "One-way Ticket To Space Train"]]
-         [:body "Space man, it's huge!"]))
+  (html5 [:head [:title "One-way Ticket To Space Train"]
+          (include-css "css/main.css")
+          (include-js "js/main.js")]
+         [:body [:div {:class "introtext"} "Space man, it's huge!"]]))
 
 (defroutes main-routes
   (GET "/" [] (intro))
