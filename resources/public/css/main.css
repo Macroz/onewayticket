@@ -4,14 +4,34 @@ body {
     text-align: center;
 }
 
-.toggleon {
+.toggleon, .pushon {
     fill: #00eeee;
     cursor: pointer;
 }
 
-.toggleoff {
+.toggleoff, .pushoff {
     fill: #002222;
     cursor: pointer;
+}
+
+.buttonoff {
+    fill: #000000;
+}
+
+.displayoff {
+    display: none;
+}
+
+.displayon {
+    display: block;
+}
+
+.layeron {
+    display: block;
+}
+
+.layeroff {
+    display: none;
 }
 
 .introtext {

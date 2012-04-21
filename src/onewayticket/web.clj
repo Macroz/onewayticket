@@ -29,24 +29,36 @@
         (re-matches #"cc:.*" k)
         (re-matches #"dc:.*" k))))
 
-(defn- cleaned-attribute? [key]
+(defn- unstyled-object? [object]
+  (some (hash-set (get-in object [:attrs :inkscape:label])) ["button" "displaymode" "space"]))
+
+(defn- cleaned-attribute? [object key]
   (or (inkscape-attribute? key)
       (let [k (name key)]
-        (re-matches #"style" k))))
+        (and (unstyled-object? object)
+             (re-matches #"style" k)))))
 
 (defn- cleanup [object]
-  (if (nil? object)
-    nil
-    (assoc object
-      :attrs (select-keys (:attrs object) (remove cleaned-attribute? (keys (:attrs object))))
-      :content (when (:content object) (remove nil? (map cleanup (:content object)))))))
+  (cond (nil? object) nil
+        (string? object) object
+        :else (let [attrs (:attrs object)
+                    content (:content object)]
+                (assoc object
+                  :attrs (when attrs
+                           (select-keys attrs
+                                        (remove (partial cleaned-attribute? object)
+                                                (keys attrs))))
+                  :content (when content
+                             (remove nil? (map cleanup content)))))))
 
 
 (defn inline-svg [filename]
   (let [filename (str "svg/" filename)
         xml (xml/parse (load-file filename))
         content (filter inkscape-layer? (xml :content))
+        defs (first (xml :content))
         content (map cleanup content)]
+    content
     (with-out-str (xml/emit {:tag :svg
                              :attrs {:xmlns:svg "http://www.w3.org/2000/svg"
                                      :xmlns "http://www.w3.org/2000/svg"
@@ -54,8 +66,7 @@
                                      :height "1080"
                                      :version "1.1"
                                      :style "border: 1px solid black"}
-                             :content content})
-      )))
+                             :content (concat [defs] content)}))))
 
 (defn intro [state]
   (html5 [:head [:title "One-way Ticket To Space Train"]

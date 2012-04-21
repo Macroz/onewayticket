@@ -33,7 +33,7 @@ function log(text) {
 }
 
 function heartbeat(fast) {
-    var speed = fast ? 10 : 1;
+    var speed = fast ? 1 : 0.1;
     return function() {
         //log("todo at " + currentTime + " size " + todo.length);
         todo.sort(function (o1, o2) { return o1.time - o2.time; });
@@ -107,6 +107,22 @@ function makeToggleButton(id, toggleFun) {
     });
 }
 
+function makePushButton(id, pushFun) {
+    var jqbutton = $("#"+id);
+    var button = jqbutton[0];
+    setSVGAttribute(button, "class", "pushoff");
+    jqbutton.on("click", function(event) {
+        log(button);
+        setSVGAttribute(button, "class", "pushon");
+        playSound("button1.wav")();
+        pushFun(event);
+        scheduleAfter(1, function() {
+            log(button);
+            setSVGAttribute(button, "class", "pushoff");
+        });
+    });
+}
+
 function checkLifeSupport() {
     if (isLifeSupport()) {
         outro();
@@ -120,13 +136,65 @@ function checkLifeSupport() {
     }
 }
 
+function makeOffButton(id) {
+    var jqbutton = $("#"+id);
+    var button = jqbutton[0];
+    setSVGAttribute(button, "class", "buttonoff");
+}
+
+function makeDisplay(displayid, layerid) {
+    var jqdisplay = $("#"+displayid);
+    var display = jqdisplay[0];
+    setSVGAttribute(display, "class", "displayoff");
+    var jqlayer = $("#"+layerid);
+    var layer = jqlayer[0];
+    setSVGAttribute(layer, "class", "layeroff");
+}
+
+function switchToPlanetDisplay(event) {
+    var jqdisplay = $("#planetarydisplaymode");
+    var display = jqdisplay[0];
+    setSVGAttribute(display, "class", "displayon");
+    var jqlayer = $("#layer2");
+    var layer = jqlayer[0];
+    setSVGAttribute(layer, "class", "layeron");
+}
+
+// var state = {
+//     "uistate": {
+//         "leftdisplay": {
+//             "buttonleft1": makeOffButton("leftleftbutton1");
+//         }
+//     }
+// };
+
 function initUI() {
-    makeToggleButton("lifesupportbutton", toggleLifeSupport);
+    makeDisplay("planetarydisplaymode", "layer2");
+    makeToggleButton("leftleftbutton1", toggleLifeSupport);
+    makePushButton("leftleftbutton2", switchToPlanetDisplay);
+    makeOffButton("leftleftbutton3");
+    makeOffButton("leftleftbutton4");
+    makeOffButton("leftleftbutton5");
+    makeOffButton("leftrightbutton1");
+    makeOffButton("leftrightbutton2");
+    makeOffButton("leftrightbutton3");
+    makeOffButton("leftrightbutton4");
+    makeOffButton("leftrightbutton5");
+    makeOffButton("rightleftbutton1");
+    makeOffButton("rightleftbutton2");
+    makeOffButton("rightleftbutton3");
+    makeOffButton("rightleftbutton4");
+    makeOffButton("rightleftbutton5");
+    makeOffButton("rightrightbutton1");
+    makeOffButton("rightrightbutton2");
+    makeOffButton("rightrightbutton3");
+    makeOffButton("rightrightbutton4");
+    makeOffButton("rightrightbutton5");
 }
 
 function init(fast) {
-    window.setInterval(heartbeat(fast), 1000);
+    window.setInterval(heartbeat(fast), 100);
     initUI();
-    scheduleNow(intro);
-    scheduleAt(60, checkLifeSupport);
+    //scheduleNow(intro);
+    //scheduleAt(60, checkLifeSupport);
 }
