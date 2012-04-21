@@ -115,10 +115,9 @@ function makePushButton(id, pushFun) {
         log(button);
         setSVGAttribute(button, "class", "pushon");
         playSound("button1.wav")();
-        pushFun(event);
         scheduleAfter(1, function() {
-            log(button);
             setSVGAttribute(button, "class", "pushoff");
+            pushFun(event);
         });
     });
 }
@@ -136,10 +135,28 @@ function checkLifeSupport() {
     }
 }
 
+function setupButton(id, name, fun) {
+    var jqtext = $("#" + id + "text");
+    var text = jqtext[0];
+    if (text) {
+        if (fun) {
+            setSVGAttribute(text, "class", "texton");
+            text.childNodes[1].firstChild.nodeValue = name;
+            makePushButton(id, fun);
+        } else {
+            setSVGAttribute(text, "class", "textoff");
+        }
+    } else {
+        log("No text setup for button " + id);
+    }
+}
+
 function makeOffButton(id) {
     var jqbutton = $("#"+id);
     var button = jqbutton[0];
     setSVGAttribute(button, "class", "buttonoff");
+    setupButton(id, "", null);
+    jqbutton.off("click");
 }
 
 function makeDisplay(displayid, layerid) {
@@ -151,27 +168,9 @@ function makeDisplay(displayid, layerid) {
     setSVGAttribute(layer, "class", "layeroff");
 }
 
-function switchToPlanetDisplay(event) {
-    var jqdisplay = $("#planetarydisplaymode");
-    var display = jqdisplay[0];
-    setSVGAttribute(display, "class", "displayon");
-    var jqlayer = $("#layer2");
-    var layer = jqlayer[0];
-    setSVGAttribute(layer, "class", "layeron");
-}
-
-// var state = {
-//     "uistate": {
-//         "leftdisplay": {
-//             "buttonleft1": makeOffButton("leftleftbutton1");
-//         }
-//     }
-// };
-
-function initUI() {
-    makeDisplay("planetarydisplaymode", "layer2");
-    makeToggleButton("leftleftbutton1", toggleLifeSupport);
-    makePushButton("leftleftbutton2", switchToPlanetDisplay);
+function unsetupAllButtons() {
+    makeOffButton("leftleftbutton1");
+    makeOffButton("leftleftbutton2");
     makeOffButton("leftleftbutton3");
     makeOffButton("leftleftbutton4");
     makeOffButton("leftleftbutton5");
@@ -190,6 +189,48 @@ function initUI() {
     makeOffButton("rightrightbutton3");
     makeOffButton("rightrightbutton4");
     makeOffButton("rightrightbutton5");
+}
+
+function switchToSpaceDisplay(event) {
+    var jqdisplay = $("#spacedisplaymode");
+    var display = jqdisplay[0];
+    setSVGAttribute(display, "class", "displayon");
+    var jqlayer = $("#layer2");
+    var layer = jqlayer[0];
+    setSVGAttribute(layer, "class", "layeron");
+    unsetupAllButtons();
+}
+
+// var state = {
+//     "uistate": {
+//         "leftdisplay": {
+//             "buttonleft1": makeOffButton("leftleftbutton1");
+//         }
+//     }
+// };
+
+function switchOffAllDisplays() {
+    unsetupAllButtons();
+    var jqdisplay = $("#spacedisplaymode");
+    var display = jqdisplay[0];
+    setSVGAttribute(display, "class", "displayoff");
+    var jqlayer = $("#layer2");
+    var layer = jqlayer[0];
+    setSVGAttribute(layer, "class", "layeroff");
+}
+
+function switchToMenu(event) {
+    //setupButton("leftrightbutton5", "System", switchToSystemDisplay);
+    setupButton("leftleftbutton1", "Off", switchOffAllDisplays);
+    setupButton("leftleftbutton2", "Space", switchToSpaceDisplay);
+}
+
+function initUI() {
+    makeDisplay("spacedisplaymode", "layer2");
+    unsetupAllButtons();
+    //makeToggleButton("leftleftbutton1", toggleLifeSupport);
+    //makePushButton("leftleftbutton2", switchToSpaceDisplay);
+    makePushButton("menubutton", switchToMenu);
 }
 
 function init(fast) {
