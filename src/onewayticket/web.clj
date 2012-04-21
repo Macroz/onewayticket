@@ -11,7 +11,7 @@
           (include-css "css/main.css")
           (include-js "http://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js")
           (include-js "js/main.js")]
-         [:body [:div {:id "intro" :class "introtext"} "Space man, it's huge!"]
+         [:body [:div {:id "intro" :class "introtext"}]
           (javascript-tag (str "init(" (:fast state) ");"))]))
 
 (defn init-game-state [& {:keys [fast] :as state}]

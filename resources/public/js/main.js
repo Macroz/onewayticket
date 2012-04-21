@@ -6,6 +6,7 @@ function schedule(item) {
 }
 
 function scheduleAt(time, fun) {
+    log("Scheduled at " + time);
     schedule({"time": time, "fun": fun});
 }
 
@@ -18,8 +19,10 @@ function scheduleAfter(time, fun) {
 }
 
 function scheduleSequenceOfText(seq) {
+    var t = currentTime;
     for (var i = 0; i < seq.length; i += 2) {
-        scheduleAfter(seq[i], displayLine(seq[i+1]));
+        t += seq[i];
+        scheduleAt(t, displayLine(seq[i+1]));
     }
 }
 
@@ -32,6 +35,7 @@ function log(text) {
 function heartbeat(fast) {
     var speed = fast ? 10 : 1;
     return function() {
+        log("todo at " + currentTime + " size " + todo.length);
         todo.sort(function (o1, o2) { return o1.time - o2.time; });
         while (todo && todo.length > 0 && todo[0].time < currentTime) {
             var next = todo.shift();
@@ -52,20 +56,25 @@ function displayLine(line) {
 }
 
 function playSound(sound) {
-    var loop = new Audio("sounds/"+sound);
-    loop.preload = true;
-    loop.play();
+    return function() {
+        var loop = new Audio("sounds/"+sound);
+        loop.preload = true;
+        loop.play();
+    };
 }
 
 function intro() {
     scheduleNow(playSound("string-1-loop.wav"));
-    scheduleAfter(5, displayLine("But what about the Tiny World theme?"));
-    scheduleAfter(10, displayLine("You shall see!"));
+    scheduleSequenceOfText([0, "Space man, it's huge!",
+                            5, displayLine("But what about the Tiny World theme?"),
+                            5, displayLine("You shall see!")]);
 }
 
 function outro() {
     scheduleNow(playSound("funeral.wav"));
-    scheduleSequenceOfText([0, "Congratulations!", 5, "You have won the game!", 5, "Send feedback to markku.rontu@iki.fi or tweet!"]);
+    scheduleSequenceOfText([0, "Congratulations!",
+                            5, "You have won the game!",
+                            5, "Send feedback to markku.rontu@iki.fi or tweet!"]);
 }
 
 
