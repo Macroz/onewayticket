@@ -176,21 +176,21 @@ function checkLifeSupport() {
     if (!isLifeSupport() && state.oxygenlevel > 0) {
         state.oxygenlevel -= 1;
         if (state.oxygenlevel == 8) {
-            displayLine("The air feels stale.")();
+            displayFor(3, "The air feels stale.")();
         } else if (state.oxygenlevel < 5) {
-            displayLine("You are suffocating!")();
+            displayFor(3, "You are suffocating!")();
         }
     } else if (isLifeSupport() && state.oxygenlevel < 10) {
         state.oxygenlevel += 1;
         if (state.oxygenlevel == 8) {
-            displayLine("The air feels fresh again.")();
+            displayFor(3, "The air feels fresh again.")();
         } else if (state.oxygenlevel < 5) {
-            displayLine("You are suffocating!")();
+            displayFor(3, "You are suffocating!")();
         }
     }
     if (state.oxygenlevel == 0) {
         scheduleNow(displayLine("You pass out!"));
-        scheduleAfter(2, die);
+        scheduleAfter(3, die);
     } else {
         scheduleAfter(10, checkLifeSupport);
     }
@@ -317,7 +317,7 @@ function initUI() {
 function init(fast) {
     window.setInterval(heartbeat(fast), 100);
     initUI();
-    //(intro);
-    start();
+    intro();
+    //start();
     //scheduleAt(60, checkLifeSupport);
 }
