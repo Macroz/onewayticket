@@ -9,8 +9,9 @@
 (defn intro []
   (html5 [:head [:title "One-way Ticket To Space Train"]
           (include-css "css/main.css")
+          (include-js "http://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js")
           (include-js "js/main.js")]
-         [:body [:div {:class "introtext"} "Space man, it's huge!"]]))
+         [:body [:div {:id "intro" :class "introtext"} "Space man, it's huge!"]]))
 
 (defroutes main-routes
   (GET "/" [] (intro))
