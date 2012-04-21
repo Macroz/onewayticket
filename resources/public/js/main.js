@@ -2,12 +2,27 @@ var currentTime = 0;
 var todo = [];
 var state = {
     "lifesupport": false,
-    "oxygenlevel": 5
-    //     "uistate": {
-    //         "leftdisplay": {
-    //             "buttonleft1": makeOffButton("leftleftbutton1");
-    //         }
-    //     }
+    "oxygenlevel": 5,
+    "modules": [{"type": "engine",     "state": "normal"},
+                {"type": "generator",  "state": "normal"},
+                {"type": "passenger",  "state": "damaged"},
+                {"type": "passenger",  "state": "normal"},
+                {"type": "passenger",  "state": "damaged"},
+                {"type": "factory",    "state": "normal"},
+
+                {"type": "generator",  "state": "normal"},
+                {"type": "passenger",  "state": "normal"},
+                {"type": "passenger",  "state": "damaged"},
+                {"type": "passenger",  "state": "normal"},
+                {"type": "sensor",     "state": "normal"},
+                {"type": "factory",    "state": "damaged"},
+
+                {"type": "generator",  "state": "normal"},
+                {"type": "passenger",  "state": "normal"},
+                {"type": "passenger",  "state": "damaged"},
+                {"type": "passenger",  "state": "normal"},
+                {"type": "passenger",  "state": "normal"},
+                {"type": "dockingbay", "state": "normal"}]
 };
 
 function schedule(item) {
@@ -119,7 +134,7 @@ function win() {
     scheduleNow(playSound("choir.wav"));
     scheduleSequenceOfText([0, "Congratulations!",
                             5, "You have won the game!",
-                            5, "Send feedback to markku.rontu@iki.fi or tweet!"], true);
+                            5, "Send feedback to markku.rontu@iki.fi or tweet @zorcam!"], true);
 }
 
 function isLifeSupport() {
@@ -171,8 +186,8 @@ function makePushButton(id, pushFun) {
 }
 
 function checkLifeSupport() {
-    log("Life Support " + state.lifesupport);
-    log("Oxygen level " + state.oxygenlevel);
+    //log("Life Support " + state.lifesupport);
+    //log("Oxygen level " + state.oxygenlevel);
     if (!isLifeSupport() && state.oxygenlevel > 0) {
         state.oxygenlevel -= 1;
         if (state.oxygenlevel == 8) {
@@ -200,7 +215,7 @@ function die() {
     scheduleNow(playSound("funeral.wav"));
     scheduleSequenceOfText([0, "You have died.",
                             5, "Reload to try again.",
-                            5, "Send feedback to markku.rontu@iki.fi or tweet!"], true, 5);
+                            5, "Send feedback to markku.rontu@iki.fi or tweet @zorcam!"], true, 5);
 }
 
 function setupButton(id, name, fun, toggle, initialState) {
@@ -277,6 +292,28 @@ function switchToSpaceDisplay(event) {
     setSVGAttribute(layer, "class", "layeron");
 }
 
+function setupModuleState(m, powered) {
+    var moduleState = state.modules[m];
+    var jqmodule = $("#module"+(m+1));
+    var module = jqmodule[0];
+    if (!powered) {
+        setSVGAttribute(module, "class", "module" + moduleState.state + " moduleunpowered");
+    } else {
+        setSVGAttribute(module, "class", "module" + moduleState.state);
+    }
+    var jqtext = $("#module"+(m+1)+"text");
+    var text = jqtext[0];
+    var desc = moduleState.type + " (" + moduleState.state + (!powered ? ", unpowered" : "") + ")";
+    text.childNodes[1].firstChild.nodeValue = desc;
+    setSVGAttribute(text, "class", "textoff");
+    jqmodule.on("mouseenter", function() {
+        setSVGAttribute(text, "class", "texton");
+    });
+    jqmodule.on("mouseleave", function() {
+        setSVGAttribute(text, "class", "textoff");
+    });
+}
+
 function switchToSystemDisplay(event) {
     switchOffAllDisplays();
     setupButton("leftleftbutton1", "Life Support", toggleLifeSupport, true, isLifeSupport());
@@ -286,6 +323,34 @@ function switchToSystemDisplay(event) {
     var jqlayer = $("#layer3");
     var layer = jqlayer[0];
     setSVGAttribute(layer, "class", "layeron");
+    var powered = [];
+    for (var m = 0; m < state.modules.length; ++m) {
+        var moduleState = state.modules[m];
+        var jqmodule = $("#module"+(m+1));
+        var module = jqmodule[0];
+        powered.push(moduleState.type == "generator" && moduleState.state == "normal");
+    }
+
+    // propagate power
+    for (var i = 0; i < 18; ++i) {
+        var newpowered = powered.slice(0);
+        for (var m = 0; m < powered.length; ++m) {
+            if (powered[m]) {
+                if (m > 0 && state.modules[m-1].state != "damaged") {
+                    newpowered[m-1] = true;
+                }
+                if (m < powered.length - 1 && state.modules[m+1].state != "damaged") {
+                    newpowered[m+1] = true;
+                }
+                newpowered[m] = true;
+            }
+        }
+        powered = newpowered;
+    }
+
+    for (var m = 0; m < powered.length; ++m) {
+        setupModuleState(m, powered[m]);
+    }
 }
 
 function switchOffAllDisplays() {
@@ -317,7 +382,7 @@ function initUI() {
 function init(fast) {
     window.setInterval(heartbeat(fast), 100);
     initUI();
-    intro();
-    //start();
+    //intro();
+    start();
     //scheduleAt(60, checkLifeSupport);
 }

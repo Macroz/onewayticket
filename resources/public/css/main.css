@@ -19,6 +19,30 @@ svg {
     height: 100%;
 }
 
+.modulenormal {
+    fill: #80ff80;
+    fill-opacity: 0.8;
+}
+
+.moduledamaged {
+    fill: #ffff80;
+    fill-opacity: 0.8;
+}
+
+.modulemelting {
+    fill: #ff8080;
+    fill-opacity: 0.8;
+}
+
+.moduledestroyed {
+    fill: #808080;
+    fill-opacity: 0.8;
+}
+
+.moduleunpowered {
+    fill-opacity: 0.2;
+}
+
 .toggleon, .pushon {
     fill: #00eeee;
     cursor: pointer;

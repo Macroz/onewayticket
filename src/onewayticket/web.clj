@@ -30,7 +30,7 @@
         (re-matches #"dc:.*" k))))
 
 (defn- unstyled-object? [object]
-  (some (hash-set (get-in object [:attrs :inkscape:label])) ["button" "displaymode" "space" "system"]))
+  (some (hash-set (get-in object [:attrs :inkscape:label])) ["button" "displaymode" "space" "system" "module"]))
 
 (defn- cleaned-attribute? [object key]
   (or (inkscape-attribute? key)
