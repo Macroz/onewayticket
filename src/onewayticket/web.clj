@@ -62,8 +62,10 @@
     (with-out-str (xml/emit {:tag :svg
                              :attrs {:xmlns:svg "http://www.w3.org/2000/svg"
                                      :xmlns "http://www.w3.org/2000/svg"
-                                     :width "1920"
-                                     :height "1080"
+                                     :width "100%"
+                                     :height "100%"
+                                     :viewBox "0 0 1920 1080"
+                                     :preserveAspectRatio "xMidYMax slice"
                                      :version "1.1"
                                      :style "border: 1px solid black"}
                              :content (concat [defs] content)}))))
