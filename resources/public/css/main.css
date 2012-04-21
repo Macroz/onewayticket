@@ -4,6 +4,14 @@ body {
     text-align: center;
 }
 
+.toggleon {
+    fill: #00eeee;
+}
+
+.toggleoff {
+    fill: #002222;
+}
+
 .introtext {
     width: 100%;
     position: absolute;

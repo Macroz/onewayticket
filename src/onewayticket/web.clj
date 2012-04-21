@@ -22,10 +22,31 @@
        (let [attrs (element :attrs)]
          (= (attrs :inkscape:groupmode) "layer"))))
 
+(defn- inkscape-attribute? [key]
+  (let [k (name key)]
+    (or (re-matches #"inkscape:.*" k)
+        (re-matches #"sodipodi:.*" k)
+        (re-matches #"cc:.*" k)
+        (re-matches #"dc:.*" k))))
+
+(defn- cleaned-attribute? [key]
+  (or (inkscape-attribute? key)
+      (let [k (name key)]
+        (re-matches #"style" k))))
+
+(defn- cleanup [object]
+  (if (nil? object)
+    nil
+    (assoc object
+      :attrs (select-keys (:attrs object) (remove cleaned-attribute? (keys (:attrs object))))
+      :content (when (:content object) (remove nil? (map cleanup (:content object)))))))
+
+
 (defn inline-svg [filename]
   (let [filename (str "svg/" filename)
         xml (xml/parse (load-file filename))
-        content (filter inkscape-layer? (xml :content))]
+        content (filter inkscape-layer? (xml :content))
+        content (map cleanup content)]
     (with-out-str (xml/emit {:tag :svg
                              :attrs {:xmlns:svg "http://www.w3.org/2000/svg"
                                      :xmlns "http://www.w3.org/2000/svg"
