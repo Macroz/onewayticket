@@ -176,16 +176,16 @@ function checkLifeSupport() {
     if (!isLifeSupport() && state.oxygenlevel > 0) {
         state.oxygenlevel -= 1;
         if (state.oxygenlevel == 8) {
-            displayFor(2, "The air feels stale.")();
+            displayLine("The air feels stale.")();
         } else if (state.oxygenlevel < 5) {
-            displayFor(2, "You are suffocating!")();
+            displayLine("You are suffocating!")();
         }
     } else if (isLifeSupport() && state.oxygenlevel < 10) {
         state.oxygenlevel += 1;
         if (state.oxygenlevel == 8) {
-            displayFor(2, "The air feels fresh again.")();
+            displayLine("The air feels fresh again.")();
         } else if (state.oxygenlevel < 5) {
-            displayFor(2, "You are suffocating!")();
+            displayLine("You are suffocating!")();
         }
     }
     if (state.oxygenlevel == 0) {
@@ -232,9 +232,11 @@ function makeOffButton(id) {
 }
 
 function makeDisplay(displayid, layerid) {
-    var jqdisplay = $("#"+displayid);
-    var display = jqdisplay[0];
-    setSVGAttribute(display, "class", "displayoff");
+    if (displayid) {
+        var jqdisplay = $("#"+displayid);
+        var display = jqdisplay[0];
+        setSVGAttribute(display, "class", "displayoff");
+    }
     if (layerid) {
         var jqlayer = $("#"+layerid);
         var layer = jqlayer[0];
@@ -281,9 +283,9 @@ function switchToSystemDisplay(event) {
     //var jqdisplay = $("#systemdisplaymode");
     //var display = jqdisplay[0];
     //setSVGAttribute(display, "class", "displayon");
-    //var jqlayer = $("#layer3");
-    //var layer = jqlayer[0];
-    //setSVGAttribute(layer, "class", "layeron");
+    var jqlayer = $("#layer3");
+    var layer = jqlayer[0];
+    setSVGAttribute(layer, "class", "layeron");
 }
 
 function switchOffAllDisplays() {
@@ -292,6 +294,9 @@ function switchOffAllDisplays() {
     var display = jqdisplay[0];
     setSVGAttribute(display, "class", "displayoff");
     var jqlayer = $("#layer2");
+    var layer = jqlayer[0];
+    setSVGAttribute(layer, "class", "layeroff");
+    var jqlayer = $("#layer3");
     var layer = jqlayer[0];
     setSVGAttribute(layer, "class", "layeroff");
 }
@@ -304,16 +309,15 @@ function switchToMenu(event) {
 
 function initUI() {
     makeDisplay("spacedisplaymode", "layer2");
-    //makeDisplay("systemdisplaymode", null);
-    unsetupAllButtons();
-    //makeToggleButton("leftleftbutton1", toggleLifeSupport);
-    //makePushButton("leftleftbutton2", switchToSpaceDisplay);
+    makeDisplay(null, "layer3");
+    switchOffAllDisplays();
     makePushButton("menubutton", switchToMenu);
 }
 
 function init(fast) {
     window.setInterval(heartbeat(fast), 100);
     initUI();
-    scheduleNow(intro);
+    //(intro);
+    start();
     //scheduleAt(60, checkLifeSupport);
 }
