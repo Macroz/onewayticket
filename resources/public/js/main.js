@@ -26,9 +26,11 @@ function initGameState(fast) {
                     {"type": "passenger",  "state": "normal"},
                     {"type": "passenger",  "state": "normal"},
                     {"type": "dockingbay", "state": "normal"}],
-        repairBotsAvailable: 2,
-        turnedOnLifeSupport: false,
-        discoveredPlanetIsLifeless: false
+	"materialsAvailable": 1,
+        "landingCraftAvailable": 2,
+        "repairBotsAvailable": 2,
+        "turnedOnLifeSupport": false,
+        "discoveredPlanetIsLifeless": false
     };
 }
 
@@ -381,8 +383,14 @@ function showModuleState(moduleState) {
                  "",
                  "Powered: " + (moduleState.powered ? "yes" : "no")];
     if (moduleState.type == "dockingbay") {
-	texts.push("");
-	texts.push("Repair bots: " + state.repairBotsAvailable);
+        texts.push("");
+        texts.push("Landing craft: " + state.landingCraftAvailable);
+        texts.push("");
+        texts.push("Repair bots: " + state.repairBotsAvailable);
+    }
+    if (moduleState.type == "factory") {
+        texts.push("");
+        texts.push("Materials: " + state.materialsAvailable);
     }
     setRightDisplayText(texts);
     if (moduleState.state == "damaged" && state.repairBotsAvailable > 0) {
@@ -391,6 +399,18 @@ function showModuleState(moduleState) {
         setupButton("rightleftbutton5", "Power", toggleGenerator(moduleState), true, moduleState.on);
     } else if (moduleState.type == "sensor") {
         setupButton("rightleftbutton5", "Sensors", toggleSensors(moduleState), true, moduleState.on);
+    } else if (moduleState.type == "factory") {
+        if (state.materialsAvailable > 0 && moduleState.powered) {
+            setupButton("rightleftbutton4", "Repair Bot (" + state.repairBotsAvailable + ")", buildRepairBot);
+        }
+    }
+}
+
+function buildRepairBot() {
+    if (state.materialsAvailable > 0) {
+	state.materialsAvailable -= 1;
+        state.repairBotsAvailable += 1;
+        updateModuleStates();
     }
 }
 
