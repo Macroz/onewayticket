@@ -17,7 +17,7 @@ function initGameState(fast) {
                     {"type": "passenger",  "state": "normal"},
                     {"type": "passenger",  "state": "damaged"},
                     {"type": "passenger",  "state": "normal"},
-                    {"type": "sensor",     "state": "normal"},
+                    {"type": "sensor",     "state": "normal", "on": false},
                     {"type": "factory",    "state": "damaged"},
 
                     {"type": "generator",  "state": "normal", "on": false},
@@ -171,8 +171,8 @@ function toggleLifeSupport(event) {
                 state.turnedOnLifeSupport = true;
             }
         } else {
-	    scheduleNow(displayLine("Damn, it won't start!"));
-	}
+            scheduleNow(displayLine("Damn, it won't start!"));
+        }
     }
 }
 
@@ -323,7 +323,9 @@ function switchToSpaceDisplay(event) {
     var layer = jqlayer[0];
     $("#layer2").attr("style", "");
     setSVGAttribute(layer, "class", "layeron");
-    setupButton("leftleftbutton1", "Scan", scanPlanet);
+    if (state.modules[10].on && state.modules[10].powered) {
+        setupButton("leftleftbutton1", "Scan", scanPlanet);
+    }
 }
 
 function updateModuleClass(moduleState, module) {
@@ -381,7 +383,27 @@ function showModuleState(moduleState) {
         setupButton("rightrightbutton5", "Repair", repairModule(moduleState));
     } else if (moduleState.type == "generator") {
         setupButton("rightleftbutton5", "Power", toggleGenerator(moduleState), true, moduleState.on);
+    } else if (moduleState.type == "sensor") {
+        setupButton("rightleftbutton5", "Sensors", toggleSensors(moduleState), true, moduleState.on);
     }
+}
+
+function toggleSensors(moduleState) {
+    return function() {
+        var jqbutton = $(event.target);
+        var button = jqbutton[0];
+
+        if (jqbutton.attr("class") == "toggleon") {
+            setSVGAttribute(button, "class", "toggleoff");
+            moduleState.on = false;
+        } else if (jqbutton.attr("class") == "toggleoff") {
+            if (state.modules[10].powered) {
+                setSVGAttribute(button, "class", "toggleon");
+                moduleState.on = true;
+            }
+        }
+        updateModuleStates();
+    };
 }
 
 function toggleGenerator(moduleState) {
@@ -508,8 +530,7 @@ function switchOffAllDisplays() {
 }
 
 function switchToMenu(event) {
-    setupButton("leftleftbutton1", "Off", switchOffAllDisplays);
-    setupButton("leftleftbutton2", "Space", switchToSpaceDisplay);
+    setupButton("leftleftbutton1", "Space", switchToSpaceDisplay);
     setupButton("leftrightbutton5", "System", switchToSystemDisplay);
 }
 
