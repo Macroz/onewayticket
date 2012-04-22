@@ -373,9 +373,40 @@ function switchToSystemDisplay(event) {
 }
 
 function scanPlanet() {
-    var jqdisplay = $("#rightdisplayback");
-    var display = jqdisplay[0];
-    jqdisplay.append("<span class='text'>Text</span>");
+    //var jqdisplay = $("#rightdisplayarea");
+    //var display = jqdisplay[0];
+    //jqdisplay.append("<text>Text</text>");
+    setRightDisplayText(["Atmosphere:",
+                         " - carbon dioxide  90 %",
+                         " - nitrogen       9.5 %",
+                         " - oxygen         0.5 %",
+                         " - pressure      23 KPa",
+                         "",
+                         "Gravity:  0.72 G",
+                         "",
+                         "Temperature:",
+                         " - surface -80 °C"]);
+}
+
+function setRightDisplayText(texts) {
+    if (!texts) {
+        texts = [];
+    }
+    for (var i = 0; i < 16; ++i) {
+        var jqtext = $("#rightdisplaytext" + (i+1));
+        var text = jqtext[0];
+        if (i < texts.length) {
+            setSVGAttribute(text, "class", "texton");
+            var t = texts[i].replace(/ /g, " ");
+            text.childNodes[1].firstChild.nodeValue = t;
+        } else {
+            setSVGAttribute(text, "class", "textoff");
+        }
+    }
+}
+
+function switchOffRightDisplay() {
+    setRightDisplayText();
 }
 
 function switchOffAllDisplays() {
@@ -389,6 +420,7 @@ function switchOffAllDisplays() {
     var jqlayer = $("#layer3");
     var layer = jqlayer[0];
     setSVGAttribute(layer, "class", "layeroff");
+    switchOffRightDisplay();
 }
 
 function switchToMenu(event) {
