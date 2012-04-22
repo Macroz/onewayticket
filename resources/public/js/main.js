@@ -7,7 +7,7 @@ function initGameState(fast) {
         "lifesupport": fast,
         "oxygenlevel": 5,
         "modules": [{"type": "engine",     "state": "normal"},
-                    {"type": "generator",  "state": "normal", "on": false},
+                    {"type": "generator",  "state": "normal", "on": fast},
                     {"type": "passenger",  "state": "damaged"},
                     {"type": "passenger",  "state": "normal"},
                     {"type": "passenger",  "state": "damaged"},
@@ -164,11 +164,15 @@ function toggleLifeSupport(event) {
         setSVGAttribute(button, "class", "toggleoff");
         state.lifesupport = false;
     } else if (jqbutton.attr("class") == "toggleoff") {
-        setSVGAttribute(button, "class", "toggleon");
-        state.lifesupport = true;
-        if (!state.turnedOnLifeSupport) {
-            state.turnedOnLifeSupport = true;
-        }
+        if (state.modules[0].powered) {
+            setSVGAttribute(button, "class", "toggleon");
+            state.lifesupport = true;
+            if (!state.turnedOnLifeSupport) {
+                state.turnedOnLifeSupport = true;
+            }
+        } else {
+	    scheduleNow(displayLine("Damn, it won't start!"));
+	}
     }
 }
 
@@ -355,13 +359,13 @@ function setupModuleState(m, powered) {
     });
     jqmodule.on("click", function() {
         unselectAllModules();
-	unsetupRightButtons();
+        unsetupRightButtons();
         moduleState.selected = true;
         updateModuleClass(moduleState, module);
         showModuleState(moduleState);
     });
     if (moduleState.selected) {
-	showModuleState(moduleState);
+        showModuleState(moduleState);
     }
     moduleState.powered = powered;
     updateModuleClass(moduleState, module);
