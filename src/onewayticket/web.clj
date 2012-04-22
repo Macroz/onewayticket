@@ -75,7 +75,7 @@
           (include-css "css/main.css")
           (include-js "http://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js")
           (include-js "js/main.js")]
-         [:body
+         [:body {:style "overflow: hidden;"}
           (inline-svg "ui.svg")
           [:div {:id "intro" :class "introtext"}]
           (javascript-tag (str "init(" (:fast state) ");"))]))
@@ -86,9 +86,48 @@
 (defn start-game [fast]
   (intro (init-game-state :fast (= "true" fast))))
 
+(defn sound-link [l]
+  [:a {:href l} l])
+
+(defn screenshot [name]
+  [:a {:href (str "/images/" name ".png")}
+   [:img {:src (str "/images/" name "s.png")}]])
+
+(defn menu []
+  (html5 [:head [:title "One-way Ticket To Space Train"]
+          (include-css "css/main.css")
+          (include-js "http://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js")
+          (include-js "js/main.js")]
+         [:body
+          [:div {:class "menu"}
+           [:h1 "One-way Ticket To Space Train"]
+           [:h3 "Game entry to " [:a {:href "http://www.ludumdare.com/"} "Ludum Dare #23"]]
+           [:h3 "By Markku Rontu / markku.rontu@iki.fi / @zorcam"]
+           [:h5 "(except sounds from Freesound artists)"
+            [:ul
+             [:li (sound-link "http://www.freesound.org/people/junggle/sounds/29304/")]
+             [:li (sound-link "http://www.freesound.org/people/Robinhood76/sounds/67032/")]
+             [:li (sound-link "http://www.freesound.org/people/ERH/sounds/29594/")]
+             [:li (sound-link "http://www.freesound.org/people/ERH/sounds/30192/")]]]
+           [:h3 [:a {:href "/game"} "Start"]]
+           [:h3 [:a {:href "/game?fast=true"} "Start (skip intro)"]]
+           [:h3 "Screenshots"]
+           [:table [:tr
+                    [:td (screenshot "screenshot1")]
+                    [:td (screenshot "screenshot2")]
+                    [:td (screenshot "screenshot3")]]]
+           [:h3 "Post-mortem"]
+           [:p "This was my first Ludum Dare and it was fun making the game. Most fun is working with the game logic and story. So I think I will go on for a bit to finish out all the ideas I had. But that's after the competition. This is where I got this time."]
+           [:p "I think I implemented around 10% of all my ideas. There was simply no time for them all. I didn't waste much time and managed to focus well. On Saturday I used 12 hours on this and on Sunday about 8."]
+           [:p "Next time I will make a tiny game, not a story driven / adventure game. Or just keep making games for fun without limits. The time limit focused doing, but it does lead to hacking."]
+           [:p "I ended up mainly programming in JavaScript, though the server part is Clojure. All graphics are SVG manipulated with the JavaScript and Clojure together. I would like to clean up that code and maybe release some libraries."]
+           ]]))
+
+
 (defroutes main-routes
-  (GET "/"  {{state :state} :session
-             {fast :fast} :params}
+  (GET "/" [] (menu))
+  (GET "/game"  {{state :state} :session
+                 {fast :fast} :params}
        (start-game fast))
   (route/resources "/")
   (route/not-found "Page not found!"))

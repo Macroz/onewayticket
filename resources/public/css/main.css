@@ -8,7 +8,20 @@ body {
     background-color: black;
     width: 100%;
     text-align: center;
-    overflow: hidden;
+    color: #ccc;
+}
+
+h1 {
+    font-family: Impact, Charcoal, sans-serif;
+}
+
+p {
+}
+
+div.menu {
+    width: 950px;
+    text-align: left;
+    display: inline-block;
 }
 
 svg {
@@ -112,16 +125,15 @@ svg {
 .introtext {
     pointer-events: none;
     position: absolute;
-    font-family: Impact, Charcoal, sans-serif;
     font-size: 2em;
     letter-spacing: 1pt;
     text-align: center;
     vertical-align: middle;
     margin: auto;
-    color: #ccc;
     top: 50%;
     width: 100%;
     height: 300px;
     margin-top: -150px;
     line-height: 2.2em;
+    font-family: Impact, Charcoal, sans-serif;
 }
