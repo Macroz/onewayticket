@@ -26,6 +26,7 @@ function initGameState(fast) {
                     {"type": "passenger",  "state": "normal"},
                     {"type": "passenger",  "state": "normal"},
                     {"type": "dockingbay", "state": "normal"}],
+        turnedOnLifeSupport: false,
         discoveredPlanetIsLifeless: false
     };
 }
@@ -165,6 +166,9 @@ function toggleLifeSupport(event) {
     } else if (jqbutton.attr("class") == "toggleoff") {
         setSVGAttribute(button, "class", "toggleon");
         state.lifesupport = true;
+        if (!state.turnedOnLifeSupport) {
+            state.turnedOnLifeSupport = true;
+        }
     }
 }
 
@@ -310,18 +314,29 @@ function switchToSpaceDisplay(event) {
     setupButton("leftleftbutton1", "Scan", scanPlanet);
 }
 
+function updateModuleClass(moduleState, module) {
+    setSVGAttribute(module, "class", "module module" + moduleState.state
+                    + (!moduleState.powered ? " moduleunpowered" : "")
+                    + (moduleState.selected ? " moduleselected" : ""));
+}
+
+function unselectAllModules() {
+    for (var m = 0; m < state.modules.length; ++m) {
+        var moduleState = state.modules[m];
+        var jqmodule = $("#module"+(m+1));
+        var module = jqmodule[0];
+        moduleState.selected = false;
+        updateModuleClass(moduleState, module);
+    }
+}
+
 function setupModuleState(m, powered) {
     var moduleState = state.modules[m];
     var jqmodule = $("#module"+(m+1));
     var module = jqmodule[0];
-    if (!powered) {
-        setSVGAttribute(module, "class", "module" + moduleState.state + " moduleunpowered");
-    } else {
-        setSVGAttribute(module, "class", "module" + moduleState.state);
-    }
     var jqtext = $("#module"+(m+1)+"text");
     var text = jqtext[0];
-    var desc = moduleState.type + " (" + moduleState.state + (!powered ? ", unpowered" : "") + ")";
+    var desc = moduleState.type;
     text.childNodes[1].firstChild.nodeValue = desc;
     setSVGAttribute(text, "class", "textoff");
     jqmodule.on("mouseenter", function() {
@@ -330,6 +345,23 @@ function setupModuleState(m, powered) {
     jqmodule.on("mouseleave", function() {
         setSVGAttribute(text, "class", "textoff");
     });
+    jqmodule.on("click", function() {
+        unselectAllModules();
+        moduleState.selected = true;
+        updateModuleClass(moduleState, module);
+        showModuleState(moduleState);
+    });
+    moduleState.selected = false;
+    moduleState.powered = powered;
+    updateModuleClass(moduleState, module);
+}
+
+function showModuleState(moduleState) {
+    setRightDisplayText(["Type: " + moduleState.type,
+                         "",
+                         "State: " + moduleState.state,
+                         "",
+                         "Powered: " + (moduleState.powered ? "yes" : "no")]);
 }
 
 function switchToSystemDisplay(event) {
