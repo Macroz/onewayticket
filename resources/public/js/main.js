@@ -26,6 +26,7 @@ function initGameState(fast) {
                     {"type": "passenger",  "state": "normal"},
                     {"type": "passenger",  "state": "normal"},
                     {"type": "dockingbay", "state": "normal"}],
+        repairBotsAvailable: 2,
         turnedOnLifeSupport: false,
         discoveredPlanetIsLifeless: false
     };
@@ -374,12 +375,17 @@ function setupModuleState(m, powered) {
 }
 
 function showModuleState(moduleState) {
-    setRightDisplayText(["Type: " + moduleState.type,
-                         "",
-                         "State: " + moduleState.state,
-                         "",
-                         "Powered: " + (moduleState.powered ? "yes" : "no")]);
-    if (moduleState.state == "damaged") {
+    var texts = ["Type: " + moduleState.type,
+                 "",
+                 "State: " + moduleState.state,
+                 "",
+                 "Powered: " + (moduleState.powered ? "yes" : "no")];
+    if (moduleState.type == "dockingbay") {
+	texts.push("");
+	texts.push("Repair bots: " + state.repairBotsAvailable);
+    }
+    setRightDisplayText(texts);
+    if (moduleState.state == "damaged" && state.repairBotsAvailable > 0) {
         setupButton("rightrightbutton5", "Repair", repairModule(moduleState));
     } else if (moduleState.type == "generator") {
         setupButton("rightleftbutton5", "Power", toggleGenerator(moduleState), true, moduleState.on);
@@ -422,8 +428,11 @@ function toggleGenerator(moduleState) {
 
 function repairModule(moduleState) {
     return function() {
-        moduleState.state = "normal";
-        updateModuleStates();
+        if (state.repairBotsAvailable > 0) {
+            state.repairBotsAvailable -= 1;
+            moduleState.state = "normal";
+            updateModuleStates();
+        }
     };
 }
 
