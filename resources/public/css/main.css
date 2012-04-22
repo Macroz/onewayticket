@@ -29,23 +29,23 @@ svg {
 }
 
 .modulenormal {
-    fill: #80ff80;
-    fill-opacity: 0.8;
+    fill: #80ffff;
+    fill-opacity: 0.6;
 }
 
 .moduledamaged {
     fill: #ffff80;
-    fill-opacity: 0.8;
+    fill-opacity: 0.6;
 }
 
 .modulemelting {
     fill: #ff8080;
-    fill-opacity: 0.8;
+    fill-opacity: 0.6;
 }
 
 .moduledestroyed {
     fill: #808080;
-    fill-opacity: 0.8;
+    fill-opacity: 0.6;
 }
 
 .moduleunpowered {

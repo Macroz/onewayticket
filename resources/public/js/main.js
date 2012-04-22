@@ -26,7 +26,7 @@ function initGameState(fast) {
                     {"type": "passenger",  "state": "normal"},
                     {"type": "passenger",  "state": "normal"},
                     {"type": "dockingbay", "state": "normal"}],
-	"materialsAvailable": 1,
+        "materialsAvailable": 5,
         "landingCraftAvailable": 2,
         "repairBotsAvailable": 2,
         "turnedOnLifeSupport": false,
@@ -248,13 +248,16 @@ function die() {
 function setupButton(id, name, fun, toggle, initialState) {
     var jqtext = $("#" + id + "text");
     var text = jqtext[0];
+    if (typeof(initialState) == "undefined") {
+	initialState = true;
+    }
     if (text) {
         if (fun) {
             setSVGAttribute(text, "class", "texton");
             text.childNodes[1].firstChild.nodeValue = name;
             if (toggle) {
                 makeToggleButton(id, fun, initialState);
-            } else {
+            } else if (initialState) {
                 makePushButton(id, fun);
             }
         } else {
@@ -378,18 +381,13 @@ function setupModuleState(m, powered) {
 
 function showModuleState(moduleState) {
     var texts = ["Type: " + moduleState.type,
-                 "",
                  "State: " + moduleState.state,
-                 "",
                  "Powered: " + (moduleState.powered ? "yes" : "no")];
     if (moduleState.type == "dockingbay") {
-        texts.push("");
         texts.push("Landing craft: " + state.landingCraftAvailable);
-        texts.push("");
         texts.push("Repair bots: " + state.repairBotsAvailable);
     }
     if (moduleState.type == "factory") {
-        texts.push("");
         texts.push("Materials: " + state.materialsAvailable);
     }
     setRightDisplayText(texts);
@@ -400,15 +398,22 @@ function showModuleState(moduleState) {
     } else if (moduleState.type == "sensor") {
         setupButton("rightleftbutton5", "Sensors", toggleSensors(moduleState), true, moduleState.on);
     } else if (moduleState.type == "factory") {
-        if (state.materialsAvailable > 0 && moduleState.powered) {
-            setupButton("rightleftbutton4", "Repair Bot (" + state.repairBotsAvailable + ")", buildRepairBot);
-        }
+        setupButton("rightleftbutton4", "Landing Craft (" + state.landingCraftAvailable + ")", buildLandingCraft, false, state.materialsAvailable > 2 && moduleState.powered);
+        setupButton("rightleftbutton5", "Repair Bot (" + state.repairBotsAvailable + ")", buildRepairBot, false, state.materialsAvailable > 0 && moduleState.powered);
+    }
+}
+
+function buildLandingCraft() {
+    if (state.materialsAvailable > 2) {
+        state.materialsAvailable -= 3;
+        state.landingCraftAvailable += 1;
+        updateModuleStates();
     }
 }
 
 function buildRepairBot() {
     if (state.materialsAvailable > 0) {
-	state.materialsAvailable -= 1;
+        state.materialsAvailable -= 1;
         state.repairBotsAvailable += 1;
         updateModuleStates();
     }
