@@ -1,29 +1,33 @@
 var currentTime = 0;
 var todo = [];
-var state = {
-    "lifesupport": false,
-    "oxygenlevel": 5,
-    "modules": [{"type": "engine",     "state": "normal"},
-                {"type": "generator",  "state": "normal"},
-                {"type": "passenger",  "state": "damaged"},
-                {"type": "passenger",  "state": "normal"},
-                {"type": "passenger",  "state": "damaged"},
-                {"type": "factory",    "state": "normal"},
+var state = {};
 
-                {"type": "generator",  "state": "normal"},
-                {"type": "passenger",  "state": "normal"},
-                {"type": "passenger",  "state": "damaged"},
-                {"type": "passenger",  "state": "normal"},
-                {"type": "sensor",     "state": "normal"},
-                {"type": "factory",    "state": "damaged"},
+function initGameState(fast) {
+    state = {
+        "lifesupport": fast,
+        "oxygenlevel": 5,
+        "modules": [{"type": "engine",     "state": "normal"},
+                    {"type": "generator",  "state": "normal"},
+                    {"type": "passenger",  "state": "damaged"},
+                    {"type": "passenger",  "state": "normal"},
+                    {"type": "passenger",  "state": "damaged"},
+                    {"type": "factory",    "state": "normal"},
 
-                {"type": "generator",  "state": "normal"},
-                {"type": "passenger",  "state": "normal"},
-                {"type": "passenger",  "state": "damaged"},
-                {"type": "passenger",  "state": "normal"},
-                {"type": "passenger",  "state": "normal"},
-                {"type": "dockingbay", "state": "normal"}]
-};
+                    {"type": "generator",  "state": "normal"},
+                    {"type": "passenger",  "state": "normal"},
+                    {"type": "passenger",  "state": "damaged"},
+                    {"type": "passenger",  "state": "normal"},
+                    {"type": "sensor",     "state": "normal"},
+                    {"type": "factory",    "state": "damaged"},
+
+                    {"type": "generator",  "state": "normal"},
+                    {"type": "passenger",  "state": "normal"},
+                    {"type": "passenger",  "state": "damaged"},
+                    {"type": "passenger",  "state": "normal"},
+                    {"type": "passenger",  "state": "normal"},
+                    {"type": "dockingbay", "state": "normal"}]
+    };
+}
 
 function schedule(item) {
     todo.push(item);
@@ -120,7 +124,7 @@ function hideAll() {
 
 function start() {
     $("#layer1").attr("style", "display: block;");
-    scheduleAfter(5, checkLifeSupport());
+    scheduleAfter(5, checkLifeSupport);
 }
 
 function intro() {
@@ -302,6 +306,8 @@ function switchToSpaceDisplay(event) {
     var layer = jqlayer[0];
     $("#layer2").attr("style", "");
     setSVGAttribute(layer, "class", "layeron");
+    setupButton("leftleftbutton1", "Scan", scanPlanet);
+
 }
 
 function setupModuleState(m, powered) {
@@ -366,6 +372,12 @@ function switchToSystemDisplay(event) {
     }
 }
 
+function scanPlanet() {
+    var jqdisplay = $("#rightdisplayback");
+    var display = jqdisplay[0];
+    jqdisplay.append("<span class='text'>Text</span>");
+}
+
 function switchOffAllDisplays() {
     unsetupAllButtons();
     var jqdisplay = $("#spacedisplaymode");
@@ -393,9 +405,13 @@ function initUI() {
 }
 
 function init(fast) {
+    initGameState(fast);
     hideAll();
-    window.setInterval(heartbeat(fast), 100);
+    window.setInterval(heartbeat(false), 100);
     initUI();
-    intro();
-    //start();
+    if (fast) {
+        start();
+    } else {
+        intro();
+    }
 }
