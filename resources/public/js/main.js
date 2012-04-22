@@ -25,7 +25,8 @@ function initGameState(fast) {
                     {"type": "passenger",  "state": "damaged"},
                     {"type": "passenger",  "state": "normal"},
                     {"type": "passenger",  "state": "normal"},
-                    {"type": "dockingbay", "state": "normal"}]
+                    {"type": "dockingbay", "state": "normal"}],
+        discoveredPlanetIsLifeless: false
     };
 }
 
@@ -307,7 +308,6 @@ function switchToSpaceDisplay(event) {
     $("#layer2").attr("style", "");
     setSVGAttribute(layer, "class", "layeron");
     setupButton("leftleftbutton1", "Scan", scanPlanet);
-
 }
 
 function setupModuleState(m, powered) {
@@ -386,6 +386,12 @@ function scanPlanet() {
                          "",
                          "Temperature:",
                          " - surface -80 °C"]);
+    if (!state.discoveredPlanetIsLifeless) {
+        state.discoveredPlanetIsLifeless = true;
+        scheduleSequenceOfText([3, "No it can't be!",
+                                5, "LD#23 is hostile to life!",
+                                5, "What am I going to do now?"]);
+    }
 }
 
 function setRightDisplayText(texts) {
