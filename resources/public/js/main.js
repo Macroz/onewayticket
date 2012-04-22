@@ -5,7 +5,7 @@ var state = {};
 function initGameState(fast) {
     state = {
         "lifesupport": fast,
-        "oxygenlevel": 5,
+        "oxygenlevel": 9,
         "modules": [{"type": "engine",     "state": "normal"},
                     {"type": "generator",  "state": "normal", "on": fast},
                     {"type": "passenger",  "state": "damaged"},
