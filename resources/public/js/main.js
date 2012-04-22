@@ -26,14 +26,23 @@ function initGameState(fast) {
                     {"type": "passenger",  "state": "normal"},
                     {"type": "passenger",  "state": "normal"},
                     {"type": "dockingbay", "state": "normal"}],
-	"uraniumAvailable": 5,
-	"fuelRodsAvailable": 0,
-        "materialsAvailable": 5,
-        "landingCraftAvailable": 2,
+        "areas": [],
+        "uraniumAvailable": 0,
+        "fuelRodsAvailable": 0,
+        "materialsAvailable": 0,
+        "landingCraftAvailable": 1,
         "repairBotsAvailable": 2,
         "turnedOnLifeSupport": false,
         "discoveredPlanetIsLifeless": false
     };
+    for (var i = 0; i < 15; ++i) {
+        state.areas[i] = {
+            "materials": Math.round(Math.random() * 11 + Math.random() * 5),
+            "uranium": Math.round(Math.random()),
+            "state": "unexplored",
+            "landingCraft": 0
+        };
+    }
 }
 
 function schedule(item) {
@@ -127,6 +136,7 @@ function hideAll() {
     $("#layer1").attr("style", "display: none;");
     $("#layer2").attr("style", "display: none;");
     $("#layer3").attr("style", "display: none;");
+    $("#layer4").attr("style", "display: none;");
 }
 
 function start() {
@@ -153,9 +163,11 @@ function intro() {
 function win() {
     hideAll();
     scheduleNow(playSound("choir.wav"));
-    scheduleSequenceOfText([0, "Congratulations!",
+    scheduleSequenceOfText([0, "You set course for a new destination, hoping there is a habitable planet there.",
+                            10, "You will see, after another long frozen journey,<br/>if you are able to escape this tiny cabin of yours.",
+                            10, "Congratulations!",
                             5, "You have won the game!",
-                            5, "Send feedback to markku.rontu@iki.fi or tweet @zorcam!"], true);
+                            5, "Send feedback to markku.rontu@iki.fi or tweet @zorcam!"], true, 15);
 }
 
 function isLifeSupport() {
@@ -251,7 +263,7 @@ function setupButton(id, name, fun, toggle, initialState) {
     var jqtext = $("#" + id + "text");
     var text = jqtext[0];
     if (typeof(initialState) == "undefined") {
-	initialState = true;
+        initialState = true;
     }
     if (text) {
         if (fun) {
@@ -334,12 +346,41 @@ function switchToSpaceDisplay(event) {
     if (state.modules[10].on && state.modules[10].powered) {
         setupButton("leftleftbutton1", "Scan", scanPlanet);
     }
+    var allModulesRepaired = true;
+    var allGeneratorsOn = true;
+    for (var m = 0; m < state.modules.length; ++m) {
+        var module = state.modules[m];
+        if (module.state == "damaged") {
+            allModulesRepaired = false;
+        }
+        if (module.type == "generator" && !module.on) {
+	    allGeneratorsOn = false;
+        }
+    }
+    if (state.modules[0].powered && state.fuelRodsAvailable > 1 && allModulesRepaired && allGeneratorsOn) {
+        setupButton("leftleftbutton5", "Continue Journey", win);
+    }
+}
+
+function updateAreaClass(areaState, area) {
+    setSVGAttribute(area, "class", "area area" + areaState.state
+                    + (areaState.selected ? " areaselected" : ""));
 }
 
 function updateModuleClass(moduleState, module) {
     setSVGAttribute(module, "class", "module module" + moduleState.state
                     + (!moduleState.powered ? " moduleunpowered" : "")
                     + (moduleState.selected ? " moduleselected" : ""));
+}
+
+function unselectAllAreas() {
+    for (var a = 0; a < state.areas.length; ++a) {
+        var areaState = state.areas[a];
+        var jqarea = $("#area"+(a+1));
+        var area = jqarea[0];
+        areaState.selected = false;
+        updateAreaClass(areaState, area);
+    }
 }
 
 function unselectAllModules() {
@@ -350,6 +391,24 @@ function unselectAllModules() {
         moduleState.selected = false;
         updateModuleClass(moduleState, module);
     }
+}
+
+function setupAreaState(a) {
+    var areaState = state.areas[a];
+    var jqarea = $("#area"+(a+1));
+    var area = jqarea[0];
+
+    jqarea.on("click", function() {
+        unselectAllAreas();
+        unsetupRightButtons();
+        areaState.selected = true;
+        updateAreaClass(areaState, area);
+        showAreaState(areaState);
+    });
+    if (areaState.selected) {
+        showAreaState(areaState);
+    }
+    updateAreaClass(areaState, area);
 }
 
 function setupModuleState(m, powered) {
@@ -374,11 +433,53 @@ function setupModuleState(m, powered) {
         updateModuleClass(moduleState, module);
         showModuleState(moduleState);
     });
+    moduleState.powered = powered;
     if (moduleState.selected) {
         showModuleState(moduleState);
     }
-    moduleState.powered = powered;
     updateModuleClass(moduleState, module);
+}
+
+function showAreaState(areaState) {
+    var texts = ["State: " + areaState.state];
+    if (areaState.state == "explored") {
+        texts.push("Materials: " + areaState.materials);
+        texts.push("Uranium: " + areaState.uranium);
+    }
+    setRightDisplayText(texts);
+    if (state.landingCraftAvailable > 0 && state.modules[15].powered) {
+        setupButton("rightleftbutton5", "Land (" + state.landingCraftAvailable + ")", landToArea(areaState));
+    }
+    if (areaState.landingCraft > 0 && state.modules[15].powered) {
+        setupButton("rightrightbutton5", "Return (" + areaState.landingCraft + ")", returnLandingCraft(areaState));
+    }
+}
+
+function landToArea(areaState) {
+    return function() {
+        if (state.landingCraftAvailable > 0 && state.modules[15].powered) {
+            state.landingCraftAvailable -= 1;
+            areaState.state = "explored";
+            areaState.landingCraft += 1;
+            updateAreaStates();
+        }
+    };
+}
+
+function returnLandingCraft(areaState) {
+    return function() {
+        if (areaState.landingCraft > 0 && state.modules[15].powered) {
+            state.landingCraftAvailable += 1;
+            var dm = Math.min(areaState.materials, 5);
+            var du = Math.min(areaState.uranium, 1);
+            state.materialsAvailable += dm;
+            state.uraniumAvailable += du;
+            areaState.materials -= dm;
+            areaState.uranium -= du;
+            areaState.landingCraft -= 1;
+            updateAreaStates();
+        }
+    };
 }
 
 function showModuleState(moduleState) {
@@ -406,7 +507,7 @@ function showModuleState(moduleState) {
     } else if (moduleState.type == "factory") {
         setupButton("rightleftbutton3", "Landing Craft (" + state.landingCraftAvailable + ")", buildLandingCraft, false, state.materialsAvailable > 4 && moduleState.powered);
         setupButton("rightleftbutton4", "Repair Bot (" + state.repairBotsAvailable + ")", buildRepairBot, false, state.materialsAvailable > 0 && moduleState.powered);
-	setupButton("rightleftbutton5", "Fuel Rod (" + state.fuelRodsAvailable + ")", buildFuelRod, false, state.uraniumAvailable > 2 && moduleState.powered);
+        setupButton("rightleftbutton5", "Fuel Rod (" + state.fuelRodsAvailable + ")", buildFuelRod, false, state.uraniumAvailable > 2 && moduleState.powered);
     }
 }
 
@@ -487,6 +588,22 @@ function switchToSystemDisplay() {
     $("#layer3").attr("style", "");
     setSVGAttribute(layer, "class", "layeron");
     updateModuleStates();
+}
+
+function switchToPlanetDisplay() {
+    switchOffAllDisplays();
+    var jqlayer = $("#layer4");
+    var layer = jqlayer[0];
+    $("#layer4").attr("style", "");
+    setSVGAttribute(layer, "class", "layeron");
+    updateAreaStates();
+}
+
+function updateAreaStates() {
+    unsetupRightButtons();
+    for (var a = 0; a < state.areas.length; ++a) {
+        setupAreaState(a);
+    }
 }
 
 function updateModuleStates() {
@@ -575,17 +692,22 @@ function switchOffAllDisplays() {
     var jqlayer = $("#layer3");
     var layer = jqlayer[0];
     setSVGAttribute(layer, "class", "layeroff");
+    var jqlayer = $("#layer4");
+    var layer = jqlayer[0];
+    setSVGAttribute(layer, "class", "layeroff");
     switchOffRightDisplay();
 }
 
 function switchToMenu(event) {
     setupButton("leftleftbutton1", "Space", switchToSpaceDisplay);
+    setupButton("leftleftbutton2", "Planet", switchToPlanetDisplay);
     setupButton("leftrightbutton5", "System", switchToSystemDisplay);
 }
 
 function initUI() {
     makeDisplay("spacedisplaymode", "layer2");
     makeDisplay(null, "layer3");
+    makeDisplay(null, "layer4");
     switchOffAllDisplays();
     makePushButton("menubutton", switchToMenu);
 }

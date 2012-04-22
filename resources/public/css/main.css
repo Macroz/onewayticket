@@ -19,6 +19,25 @@ svg {
     height: 100%;
 }
 
+.area {
+    cursor: pointer;
+}
+
+.areaselected {
+    stroke: #00ffff;
+    stroke-width: 10px;
+}
+
+.areaunexplored {
+    fill: #80ffff;
+    fill-opacity: 0.2;
+}
+
+.areaexplored {
+    fill: #80ffff;
+    fill-opacity: 0.6;
+}
+
 .module {
     cursor: pointer;
 }
