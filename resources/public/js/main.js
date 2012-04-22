@@ -133,10 +133,10 @@ function intro() {
                             15, "Year 2040 the ship is ready.<br/>It is named the Orion Express,<br/>a veritable space train sailing on the solar winds.",
                             8, "Year 2041 the ship departs on its maiden voyage,<br/>with 10 000 cryogenically frozen colonists.",
                             8, "To journey to the closest star with a known habitable planet<br/>and ensure the future of mankind.",
-                            10, "You as its captain are responsible for its destiny.<br/>But not yet.",
-                            8, "Time passes as the ship makes its journey.",
-                            5, "Then you begin to wake up..."], false, 15, 5);
-    scheduleAfter(87, start);
+                            10, "You as its captain are responsible for its destiny.<br/>",
+                            8, "A thousand years pass in the blink of an eye, as the ship makes its journey.",
+                            8, "Then you begin to wake up... the future is up to you."], false, 15, 5);
+    scheduleAfter(89, start);
 }
 
 function win() {
@@ -300,6 +300,7 @@ function switchToSpaceDisplay(event) {
     setSVGAttribute(display, "class", "displayon");
     var jqlayer = $("#layer2");
     var layer = jqlayer[0];
+    $("#layer2").attr("style", "");
     setSVGAttribute(layer, "class", "layeron");
 }
 
@@ -333,6 +334,7 @@ function switchToSystemDisplay(event) {
     //setSVGAttribute(display, "class", "displayon");
     var jqlayer = $("#layer3");
     var layer = jqlayer[0];
+    $("#layer3").attr("style", "");
     setSVGAttribute(layer, "class", "layeron");
     var powered = [];
     for (var m = 0; m < state.modules.length; ++m) {
