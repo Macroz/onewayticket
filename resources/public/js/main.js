@@ -7,20 +7,20 @@ function initGameState(fast) {
         "lifesupport": fast,
         "oxygenlevel": 5,
         "modules": [{"type": "engine",     "state": "normal"},
-                    {"type": "generator",  "state": "normal"},
+                    {"type": "generator",  "state": "normal", "on": false},
                     {"type": "passenger",  "state": "damaged"},
                     {"type": "passenger",  "state": "normal"},
                     {"type": "passenger",  "state": "damaged"},
                     {"type": "factory",    "state": "normal"},
 
-                    {"type": "generator",  "state": "normal"},
+                    {"type": "generator",  "state": "normal", "on": false},
                     {"type": "passenger",  "state": "normal"},
                     {"type": "passenger",  "state": "damaged"},
                     {"type": "passenger",  "state": "normal"},
                     {"type": "sensor",     "state": "normal"},
                     {"type": "factory",    "state": "damaged"},
 
-                    {"type": "generator",  "state": "normal"},
+                    {"type": "generator",  "state": "normal", "on": false},
                     {"type": "passenger",  "state": "normal"},
                     {"type": "passenger",  "state": "damaged"},
                     {"type": "passenger",  "state": "normal"},
@@ -279,7 +279,7 @@ function makeDisplay(displayid, layerid) {
     }
 }
 
-function unsetupAllButtons() {
+function unsetupLeftButtons() {
     makeOffButton("leftleftbutton1");
     makeOffButton("leftleftbutton2");
     makeOffButton("leftleftbutton3");
@@ -290,6 +290,9 @@ function unsetupAllButtons() {
     makeOffButton("leftrightbutton3");
     makeOffButton("leftrightbutton4");
     makeOffButton("leftrightbutton5");
+}
+
+function unsetupRightButtons() {
     makeOffButton("rightleftbutton1");
     makeOffButton("rightleftbutton2");
     makeOffButton("rightleftbutton3");
@@ -300,6 +303,11 @@ function unsetupAllButtons() {
     makeOffButton("rightrightbutton3");
     makeOffButton("rightrightbutton4");
     makeOffButton("rightrightbutton5");
+}
+
+function unsetupAllButtons() {
+    unsetupLeftButtons();
+    unsetupRightButtons();
 }
 
 function switchToSpaceDisplay(event) {
@@ -347,11 +355,14 @@ function setupModuleState(m, powered) {
     });
     jqmodule.on("click", function() {
         unselectAllModules();
+	unsetupRightButtons();
         moduleState.selected = true;
         updateModuleClass(moduleState, module);
         showModuleState(moduleState);
     });
-    moduleState.selected = false;
+    if (moduleState.selected) {
+	showModuleState(moduleState);
+    }
     moduleState.powered = powered;
     updateModuleClass(moduleState, module);
 }
@@ -362,9 +373,35 @@ function showModuleState(moduleState) {
                          "State: " + moduleState.state,
                          "",
                          "Powered: " + (moduleState.powered ? "yes" : "no")]);
+    if (moduleState.state == "damaged") {
+        setupButton("rightrightbutton5", "Repair", repairModule(moduleState));
+    } else if (moduleState.type == "generator") {
+        setupButton("rightleftbutton5", "Power", toggleGenerator(moduleState), true, moduleState.on);
+    }
 }
 
-function switchToSystemDisplay(event) {
+function toggleGenerator(moduleState) {
+    return function() {
+        var jqbutton = $(event.target);
+        var button = jqbutton[0];
+        moduleState.on = !moduleState.on;
+        if (jqbutton.attr("class") == "toggleon") {
+            setSVGAttribute(button, "class", "toggleoff");
+        } else if (jqbutton.attr("class") == "toggleoff") {
+            setSVGAttribute(button, "class", "toggleon");
+        }
+        updateModuleStates();
+    };
+}
+
+function repairModule(moduleState) {
+    return function() {
+        moduleState.state = "normal";
+        updateModuleStates();
+    };
+}
+
+function switchToSystemDisplay() {
     switchOffAllDisplays();
     setupButton("leftleftbutton1", "Life Support", toggleLifeSupport, true, isLifeSupport());
     //var jqdisplay = $("#systemdisplaymode");
@@ -374,12 +411,17 @@ function switchToSystemDisplay(event) {
     var layer = jqlayer[0];
     $("#layer3").attr("style", "");
     setSVGAttribute(layer, "class", "layeron");
+    updateModuleStates();
+}
+
+function updateModuleStates() {
+    unsetupRightButtons();
     var powered = [];
     for (var m = 0; m < state.modules.length; ++m) {
         var moduleState = state.modules[m];
         var jqmodule = $("#module"+(m+1));
         var module = jqmodule[0];
-        powered.push(moduleState.type == "generator" && moduleState.state == "normal");
+        powered.push(moduleState.type == "generator" && moduleState.state == "normal" && moduleState.on);
     }
 
     // propagate power
