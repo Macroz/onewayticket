@@ -26,6 +26,8 @@ function initGameState(fast) {
                     {"type": "passenger",  "state": "normal"},
                     {"type": "passenger",  "state": "normal"},
                     {"type": "dockingbay", "state": "normal"}],
+	"uraniumAvailable": 5,
+	"fuelRodsAvailable": 0,
         "materialsAvailable": 5,
         "landingCraftAvailable": 2,
         "repairBotsAvailable": 2,
@@ -389,6 +391,10 @@ function showModuleState(moduleState) {
     }
     if (moduleState.type == "factory") {
         texts.push("Materials: " + state.materialsAvailable);
+        texts.push("Uranium: " + state.uraniumAvailable);
+    }
+    if (moduleState.type == "engine") {
+        texts.push("Fuel rods: " + state.fuelRodsAvailable);
     }
     setRightDisplayText(texts);
     if (moduleState.state == "damaged" && state.repairBotsAvailable > 0) {
@@ -398,14 +404,23 @@ function showModuleState(moduleState) {
     } else if (moduleState.type == "sensor") {
         setupButton("rightleftbutton5", "Sensors", toggleSensors(moduleState), true, moduleState.on);
     } else if (moduleState.type == "factory") {
-        setupButton("rightleftbutton4", "Landing Craft (" + state.landingCraftAvailable + ")", buildLandingCraft, false, state.materialsAvailable > 2 && moduleState.powered);
-        setupButton("rightleftbutton5", "Repair Bot (" + state.repairBotsAvailable + ")", buildRepairBot, false, state.materialsAvailable > 0 && moduleState.powered);
+        setupButton("rightleftbutton3", "Landing Craft (" + state.landingCraftAvailable + ")", buildLandingCraft, false, state.materialsAvailable > 4 && moduleState.powered);
+        setupButton("rightleftbutton4", "Repair Bot (" + state.repairBotsAvailable + ")", buildRepairBot, false, state.materialsAvailable > 0 && moduleState.powered);
+	setupButton("rightleftbutton5", "Fuel Rod (" + state.fuelRodsAvailable + ")", buildFuelRod, false, state.uraniumAvailable > 2 && moduleState.powered);
+    }
+}
+
+function buildFuelRod() {
+    if (state.uraniumAvailable > 2) {
+        state.uraniumAvailable -= 3;
+        state.fuelRodsAvailable += 1;
+        updateModuleStates();
     }
 }
 
 function buildLandingCraft() {
-    if (state.materialsAvailable > 2) {
-        state.materialsAvailable -= 3;
+    if (state.materialsAvailable > 4) {
+        state.materialsAvailable -= 5;
         state.landingCraftAvailable += 1;
         updateModuleStates();
     }
