@@ -3,11 +3,12 @@ var todo = [];
 var state = {};
 
 function initGameState(fast) {
+    var debug = false;
     state = {
-        "lifesupport": fast,
+        "lifesupport": debug,
         "oxygenlevel": 9,
         "modules": [{"type": "engine",     "state": "normal"},
-                    {"type": "generator",  "state": "normal", "on": fast},
+                    {"type": "generator",  "state": "normal", "on": debug},
                     {"type": "passenger",  "state": "damaged"},
                     {"type": "passenger",  "state": "normal"},
                     {"type": "passenger",  "state": "damaged"},
@@ -38,7 +39,7 @@ function initGameState(fast) {
     for (var i = 0; i < 15; ++i) {
         state.areas[i] = {
             "materials": Math.round(Math.random() * 11 + Math.random() * 5),
-            "uranium": Math.round(Math.random()),
+            "uranium": Math.round(Math.random() + Math.random() * 2),
             "state": "unexplored",
             "landingCraft": 0
         };
@@ -166,7 +167,7 @@ function win() {
     scheduleSequenceOfText([0, "You set course for a new destination, hoping there is a habitable planet there.",
                             10, "You will see, after another long frozen journey,<br/>if you are able to escape this tiny cabin of yours.",
                             10, "Congratulations!",
-                            5, "You have won the game!",
+                            5, "You have finished the game!",
                             5, "Send feedback to markku.rontu@iki.fi or tweet @zorcam!"], true, 15);
 }
 
