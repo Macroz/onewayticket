@@ -537,7 +537,7 @@ function buildRepairBot() {
 }
 
 function toggleSensors(moduleState) {
-    return function() {
+    return function(event) {
         var jqbutton = $(event.target);
         var button = jqbutton[0];
 
@@ -555,7 +555,7 @@ function toggleSensors(moduleState) {
 }
 
 function toggleGenerator(moduleState) {
-    return function() {
+    return function(event) {
         var jqbutton = $(event.target);
         var button = jqbutton[0];
         moduleState.on = !moduleState.on;
